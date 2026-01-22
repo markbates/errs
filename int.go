@@ -12,6 +12,9 @@ func (i Int) Error() string {
 
 // Is reports whether the target is also an Int error, ignoring the value.
 func (i Int) Is(target error) bool {
-	_, ok := target.(Int)
-	return ok
+	if t, ok := target.(Int); ok {
+		return i == t
+	}
+
+	return false
 }

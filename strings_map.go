@@ -13,7 +13,7 @@ func (m StringsMap) Error() string {
 	return stringifyMap(map[string][]string(m))
 }
 
-// Is reports whether the target is also a StringsMap error, ignoring the value.
+// Is returns true if the target is a StringsMap with the same keys and values.
 func (m StringsMap) Is(target error) bool {
 	t, ok := target.(StringsMap)
 	if !ok {

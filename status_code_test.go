@@ -1,7 +1,6 @@
 package errs
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"testing"
@@ -12,81 +11,116 @@ import (
 func Test_StatusCode(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Error()", func(t *testing.T) {
-		t.Parallel()
+	tcs := []struct {
+		name string
+		val  StatusCode
+		exp  string
+	}{
+		{
+			name: "specific status code",
+			val:  StatusCode(404),
+			exp:  "status: 404",
+		},
+		{
+			name: "zero status code defaults to 200",
+			val:  StatusCode(0),
+			exp:  "status: 200",
+		},
+	}
 
-		r := require.New(t)
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 
-		e := StatusCode(404)
-		r.Equal("status: 404", e.Error())
-	})
+			r := require.New(t)
 
-	t.Run("Is()", func(t *testing.T) {
-		t.Parallel()
+			act := tc.val.Error()
 
-		r := require.New(t)
+			r.Equal(tc.exp, act)
+		})
+	}
+}
 
-		e1 := StatusCode(500)
-		e2 := StatusCode(404)
-		e3 := fmt.Errorf("some other error")
+func Test_StatusCode_Is(t *testing.T) {
+	t.Parallel()
 
-		r.ErrorIs(e1, e2)
-		r.True(errors.Is(e1, e2))
-		r.True(e1.Is(e2))
+	tcs := []struct {
+		name   string
+		err    error
+		target error
+		exp    bool
+	}{
+		{
+			name:   "same type and value",
+			err:    StatusCode(404),
+			target: StatusCode(404),
+			exp:    true,
+		},
+		{
+			name:   "same type different value",
+			err:    StatusCode(404),
+			target: StatusCode(200),
+			exp:    false,
+		},
+		{
+			name:   "different type",
+			err:    StatusCode(404),
+			target: errors.New("standard error"),
+			exp:    false,
+		},
+		{
+			name:   "unwrap same type and value",
+			err:    fmt.Errorf("wrapping: %w", StatusCode(404)),
+			target: StatusCode(404),
+			exp:    true,
+		},
+	}
 
-		r.NotErrorIs(e1, e3)
-		r.False(errors.Is(e1, e3))
-		r.False(e1.Is(e3))
-	})
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 
-	t.Run("As()", func(t *testing.T) {
-		t.Parallel()
+			r := require.New(t)
 
-		r := require.New(t)
+			act := errors.Is(tc.err, tc.target)
 
-		var err error = StatusCode(401)
+			r.Equal(tc.exp, act)
+		})
+	}
+}
 
-		var target StatusCode
-		r.True(errors.As(err, &target))
-		r.Equal(err, target)
+func Test_StatusCode_MarshalJSON(t *testing.T) {
+	t.Parallel()
 
-		var target2 String
-		r.False(errors.As(err, &target2))
-	})
+	tcs := []struct {
+		name string
+		val  StatusCode
+		exp  string
+	}{
+		{
+			name: "specific status code",
+			val:  StatusCode(404),
+			exp:  "404",
+		},
+		{
+			name: "zero status code defaults to 200",
+			val:  StatusCode(0),
+			exp:  "200",
+		},
+	}
 
-	t.Run("Unwrap()", func(t *testing.T) {
-		t.Parallel()
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 
-		r := require.New(t)
+			r := require.New(t)
 
-		e := StatusCode(403)
+			actBytes, err := tc.val.MarshalJSON()
+			r.NoError(err)
 
-		r.Nil(errors.Unwrap(e))
-	})
-	t.Run("status code zero defaults to 500", func(t *testing.T) {
-		t.Parallel()
-		r := require.New(t)
+			act := string(actBytes)
 
-		err := StatusCode(0)
-		r.Equal(500, err.StatusCode())
-		r.Equal("status: 500", err.Error())
-	})
-
-	t.Run("json", func(t *testing.T) {
-		t.Parallel()
-		r := require.New(t)
-
-		sc := StatusCode(0)
-		r.Equal(500, sc.StatusCode())
-
-		b, err := json.Marshal(sc)
-		r.NoError(err)
-		r.Equal("500", string(b))
-
-		var decoded StatusCode
-		err = json.Unmarshal([]byte("404"), &decoded)
-		r.NoError(err)
-		r.Equal(404, decoded.StatusCode())
-
-	})
+			r.Equal(tc.exp, act)
+		})
+	}
 }

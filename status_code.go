@@ -3,6 +3,7 @@ package errs
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 )
 
 // StatusCode is a typed error value that represents an HTTP status code.
@@ -15,14 +16,17 @@ func (s StatusCode) Error() string {
 
 // Is reports whether the target is also a StatusCode error, ignoring the value.
 func (s StatusCode) Is(target error) bool {
-	_, ok := target.(StatusCode)
-	return ok
+	if t, ok := target.(StatusCode); ok {
+		return s.StatusCode() == t.StatusCode()
+	}
+
+	return false
 }
 
-// StatusCode returns the code value, defaulting to 500 when it is zero.
+// StatusCode returns the code value, defaulting to 200 when it is zero.
 func (s StatusCode) StatusCode() int {
 	if s == 0 {
-		return 500
+		return http.StatusOK
 	}
 
 	return int(s)

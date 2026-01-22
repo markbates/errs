@@ -1,6 +1,6 @@
 # errs
 
-The [`github.com/markbates/errs`](https://pkg.go.dev/github.com/markbates/errs) package provides simple typed error implementations for common use cases,
+The <godoc>github.com/markbates/errs</godoc> package provides simple typed error implementations for common use cases,
 including HTTP status codes, integers, and strings. It also includes several map types
 for aggregating field-specific errors.
 

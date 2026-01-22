@@ -1,4 +1,4 @@
-.PHONY: test coverage lint run
+.PHONY: test coverage lint run doc readme coverage-open
 
 test: lint coverage
 	go test -cover -count=1 -race ./...
@@ -27,3 +27,6 @@ doc:
 	go install golang.org/x/tools/cmd/godoc@latest
 	@echo "Documentation running at http://localhost:6060/pkg/github.com/markbates/myapp"
 	godoc -http=:6060
+
+readme:
+	hype export -o README.md

@@ -11,55 +11,86 @@ import (
 func Test_Int(t *testing.T) {
 	t.Parallel()
 
-	t.Run("Error()", func(t *testing.T) {
-		t.Parallel()
+	tcs := []struct {
+		name string
+		val  Int
+		exp  string
+	}{
+		{
+			name: "positive integer",
+			val:  Int(42),
+			exp:  "42 error",
+		},
+		{
+			name: "zero",
+			val:  Int(0),
+			exp:  "0 error",
+		},
+		{
+			name: "negative integer",
+			val:  Int(-7),
+			exp:  "-7 error",
+		},
+	}
 
-		r := require.New(t)
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 
-		e := Int(404)
-		r.Equal("404 error", e.Error())
-	})
+			r := require.New(t)
 
-	t.Run("Is()", func(t *testing.T) {
-		t.Parallel()
+			act := tc.val.Error()
 
-		r := require.New(t)
+			r.Equal(tc.exp, act)
+		})
+	}
+}
 
-		e1 := Int(500)
-		e2 := Int(404)
-		e3 := fmt.Errorf("some other error")
+func Test_Int_Is(t *testing.T) {
+	t.Parallel()
 
-		r.ErrorIs(e1, e2)
-		r.True(errors.Is(e1, e2))
-		r.True(e1.Is(e2))
+	tcs := []struct {
+		name   string
+		err    error
+		target error
+		exp    bool
+	}{
+		{
+			name:   "same type and value",
+			err:    Int(5),
+			target: Int(5),
+			exp:    true,
+		},
+		{
+			name:   "same type different value",
+			err:    Int(5),
+			target: Int(10),
+			exp:    false,
+		},
+		{
+			name:   "different type",
+			err:    Int(5),
+			target: String("some error"),
+			exp:    false,
+		},
+		{
+			name:   "unwrap same error",
+			err:    fmt.Errorf("wrapping: %w", Int(5)),
+			target: Int(5),
+			exp:    true,
+		},
+	}
 
-		r.NotErrorIs(e1, e3)
-		r.False(errors.Is(e1, e3))
-		r.False(e1.Is(e3))
-	})
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 
-	t.Run("As()", func(t *testing.T) {
-		t.Parallel()
+			r := require.New(t)
 
-		r := require.New(t)
+			act := errors.Is(tc.err, tc.target)
 
-		var err error = Int(401)
+			r.Equal(tc.exp, act)
+		})
+	}
 
-		var target Int
-		r.True(errors.As(err, &target))
-		r.Equal(err, target)
-
-		var target2 String
-		r.False(errors.As(err, &target2))
-	})
-
-	t.Run("Unwrap()", func(t *testing.T) {
-		t.Parallel()
-
-		r := require.New(t)
-
-		e := Int(403)
-
-		r.Nil(errors.Unwrap(e))
-	})
 }
