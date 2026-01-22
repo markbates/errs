@@ -12,6 +12,10 @@ func (e String) Error() string {
 
 // Is reports whether the target is also a String error, ignoring the value.
 func (e String) Is(target error) bool {
-	_, ok := target.(String)
-	return ok
+	s, ok := target.(String)
+	if !ok {
+		return false
+	}
+
+	return string(e) == string(s)
 }

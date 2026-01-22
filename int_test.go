@@ -27,7 +27,7 @@ func Test_Int(t *testing.T) {
 
 		e1 := Int(500)
 		e2 := Int(404)
-		var e3 error = fmt.Errorf("some other error")
+		e3 := fmt.Errorf("some other error")
 
 		r.ErrorIs(e1, e2)
 		r.True(errors.Is(e1, e2))

@@ -28,7 +28,7 @@ func Test_StatusCode(t *testing.T) {
 
 		e1 := StatusCode(500)
 		e2 := StatusCode(404)
-		var e3 error = fmt.Errorf("some other error")
+		e3 := fmt.Errorf("some other error")
 
 		r.ErrorIs(e1, e2)
 		r.True(errors.Is(e1, e2))
