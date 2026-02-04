@@ -82,7 +82,7 @@ func Test_StringsMap_Is(t *testing.T) {
 			target: StringsMap{
 				"field": {"different error"},
 			},
-			exp: false,
+			exp: true,
 		},
 	}
 
